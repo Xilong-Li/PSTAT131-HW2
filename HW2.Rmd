@@ -10,21 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-install.packages('usethis')
-library(usethis)
-use_git_config(user.name = "Xilong Li", user.email = "xilong_li@Ucsb.edu")
-usethis::create_github_token()
-
-gitcreds::gitcreds_set()
-
-credentials::set_github_pat()
-#> If prompted for GitHub credentials, enter your PAT in the password field
-#> Using GITHUB_PAT from Jennifer (Jenny) Bryan (credential helper: osxkeychain)
-
-```
-
-
-```{r}
 library(tidymodels)
 library(tidyverse)
 library(ggplot2)
