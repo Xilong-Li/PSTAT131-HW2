@@ -36,7 +36,7 @@ abalone %>%
 As the histogram shown above, the distribution of age is approximately normal, with a tail on the right.        
 And most of the abalone has the age around 10 in this data set.
 
-## QUestion 2:
+## Question 2:
 ```{r}
 set.seed(2216)
 
