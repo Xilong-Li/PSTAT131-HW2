@@ -1527,7 +1527,6 @@ if (window.hljs) {
 
 
 
-
 <style type="text/css">
 .main-container {
   max-width: 940px;
@@ -1548,9 +1547,6 @@ button.code-folding-btn:focus {
 }
 summary {
   display: list-item;
-}
-details > summary > p:only-child {
-  display: inline;
 }
 pre code {
   padding: 0;
@@ -1644,7 +1640,7 @@ pre code {
 <pre class="r"><code>library(tidymodels)</code></pre>
 <pre><code>## -- Attaching packages -------------------------------------- tidymodels 0.2.0 --</code></pre>
 <pre><code>## v broom        0.7.12     v recipes      0.2.0 
-## v dials        0.1.1      v rsample      0.1.1 
+## v dials        0.1.0      v rsample      0.1.1 
 ## v dplyr        1.0.8      v tibble       3.1.6 
 ## v ggplot2      3.3.5      v tidyr        1.2.0 
 ## v infer        1.0.0      v tune         0.2.0 
@@ -1656,10 +1652,10 @@ pre code {
 ## x dplyr::filter()  masks stats::filter()
 ## x dplyr::lag()     masks stats::lag()
 ## x recipes::step()  masks stats::step()
-## * Learn how to get started at https://www.tidymodels.org/start/</code></pre>
+## * Use suppressPackageStartupMessages() to eliminate package startup messages</code></pre>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
-<pre><code>## v readr   2.1.2     v forcats 0.5.1
+<pre><code>## v readr   2.1.1     v forcats 0.5.1
 ## v stringr 1.4.0</code></pre>
 <pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
 ## x readr::col_factor() masks scales::col_factor()
@@ -1720,7 +1716,7 @@ dim(abalone_train)</code></pre>
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["age"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["type"],"name":[2],"type":["chr"],"align":["left"]},{"label":["longest_shell"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["diameter"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["height"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["whole_weight"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["shucked_weight"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["viscera_weight"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["shell_weight"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["rings"],"name":[10],"type":["int"],"align":["right"]}],"data":[{"1":"16.5","2":"M","3":"0.455","4":"0.365","5":"0.095","6":"0.5140","7":"0.2245","8":"0.1010","9":"0.150","10":"15","_rn_":"1"},{"1":"8.5","2":"M","3":"0.350","4":"0.265","5":"0.090","6":"0.2255","7":"0.0995","8":"0.0485","9":"0.070","10":"7","_rn_":"2"},{"1":"10.5","2":"F","3":"0.530","4":"0.420","5":"0.135","6":"0.6770","7":"0.2565","8":"0.1415","9":"0.210","10":"9","_rn_":"3"},{"1":"11.5","2":"M","3":"0.440","4":"0.365","5":"0.125","6":"0.5160","7":"0.2155","8":"0.1140","9":"0.155","10":"10","_rn_":"4"},{"1":"8.5","2":"I","3":"0.330","4":"0.255","5":"0.080","6":"0.2050","7":"0.0895","8":"0.0395","9":"0.055","10":"7","_rn_":"5"},{"1":"9.5","2":"I","3":"0.425","4":"0.300","5":"0.095","6":"0.3515","7":"0.1410","8":"0.0775","9":"0.120","10":"8","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
-<pre class="r"><code>abalone_recipe &lt;-
+<pre class="r"><code>abalone_recipe &lt;- 
   recipe(age ~ 
            type + 
            longest_shell + 
@@ -1734,7 +1730,8 @@ dim(abalone_train)</code></pre>
   step_interact(~ starts_with(&quot;type&quot;):shucked_weight) %&gt;% 
   step_interact(~ longest_shell:diameter) %&gt;% 
   step_interact(~ shucked_weight:shell_weight) %&gt;% 
-  step_normalize()
+  step_center(all_predictors()) %&gt;% 
+  step_scale(all_predictors())
 
 abalone_recipe </code></pre>
 <pre><code>## Recipe
@@ -1751,7 +1748,8 @@ abalone_recipe </code></pre>
 ## Interactions with starts_with(&quot;type&quot;):shucked_weight
 ## Interactions with longest_shell:diameter
 ## Interactions with shucked_weight:shell_weight
-## Centering and scaling for &lt;none&gt;</code></pre>
+## Centering for all_predictors()
+## Scaling for all_predictors()</code></pre>
 <pre class="r"><code># We should not include the predictor &quot;rings&quot;, 
 # because the data of age is directly derived from rings;
 # Thus, the training data would be 100% compatible with the testing data on the predictor of &quot;rings&quot;</code></pre>
@@ -1775,7 +1773,15 @@ abalone_recipe </code></pre>
 <div id="question-6" class="section level2">
 <h2>QUestion 6:</h2>
 <pre class="r"><code>lm_fit &lt;- fit(lm_wflow, abalone_train)
-hypo &lt;- data.frame(type = &quot;F&quot;, 
+lm_fit %&gt;% 
+  extract_fit_parsnip() %&gt;%
+  tidy()</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["term"],"name":[1],"type":["chr"],"align":["left"]},{"label":["estimate"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["std.error"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["statistic"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"(Intercept)","2":"11.4527088","3":"0.03693697","4":"310.060860","5":"0.000000e+00"},{"1":"longest_shell","2":"0.6714849","3":"0.28519075","4":"2.354511","5":"1.860488e-02"},{"1":"diameter","2":"1.8979599","3":"0.31139196","4":"6.095083","5":"1.219078e-09"},{"1":"height","2":"0.2006631","3":"0.06912783","4":"2.902783","5":"3.722947e-03"},{"1":"whole_weight","2":"4.9597981","3":"0.39691854","4":"12.495758","5":"4.761404e-35"},{"1":"shucked_weight","2":"-4.2517591","3":"0.25087017","4":"-16.948046","5":"7.304594e-62"},{"1":"viscera_weight","2":"-0.9966224","3":"0.15712836","4":"-6.342728","5":"2.561956e-10"},{"1":"shell_weight","2":"1.7668186","3":"0.21616954","4":"8.173300","5":"4.219081e-16"},{"1":"type_I","2":"-0.9507841","3":"0.11098537","4":"-8.566752","5":"1.603461e-17"},{"1":"type_M","2":"-0.2115236","3":"0.10056880","4":"-2.103273","5":"3.551684e-02"},{"1":"type_I_x_shucked_weight","2":"0.5169948","3":"0.08410595","4":"6.146947","5":"8.835517e-10"},{"1":"type_M_x_shucked_weight","2":"0.2744808","3":"0.10721081","4":"2.560197","5":"1.050508e-02"},{"1":"longest_shell_x_diameter","2":"-2.8048613","3":"0.39486670","4":"-7.103312","5":"1.483023e-12"},{"1":"shucked_weight_x_shell_weight","2":"-0.1612929","3":"0.20082316","4":"-0.803159","5":"4.219402e-01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>response &lt;- data.frame(type = &quot;F&quot;, 
                    longest_shell = 0.50, 
                    diameter = 0.10, 
                    height = 0.30, 
@@ -1785,7 +1791,7 @@ hypo &lt;- data.frame(type = &quot;F&quot;,
                    shell_weight = 1)
 
 # use predict() to predict the age of the hypothetical age of abalone:
-predict(lm_fit,new_data = hypo)</code></pre>
+predict(lm_fit,new_data = response)</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[".pred"],"name":[1],"type":["dbl"],"align":["right"]}],"data":[{"1":"23.36492"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}

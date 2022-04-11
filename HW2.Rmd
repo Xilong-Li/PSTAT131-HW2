@@ -5,6 +5,7 @@ date: '2022-04-10'
 output:
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -51,7 +52,7 @@ dim(abalone_test)
 ## Question 3:
 ```{r}
 head(abalone)
-abalone_recipe <-
+abalone_recipe <- 
   recipe(age ~ 
            type + 
            longest_shell + 
@@ -65,7 +66,8 @@ abalone_recipe <-
   step_interact(~ starts_with("type"):shucked_weight) %>% 
   step_interact(~ longest_shell:diameter) %>% 
   step_interact(~ shucked_weight:shell_weight) %>% 
-  step_normalize()
+  step_center(all_predictors()) %>% 
+  step_scale(all_predictors())
 
 abalone_recipe 
 
@@ -96,7 +98,11 @@ lm_wflow <- workflow() %>%
 ## QUestion 6:
 ```{r}
 lm_fit <- fit(lm_wflow, abalone_train)
-hypo <- data.frame(type = "F", 
+lm_fit %>% 
+  extract_fit_parsnip() %>%
+  tidy()
+
+response <- data.frame(type = "F", 
                    longest_shell = 0.50, 
                    diameter = 0.10, 
                    height = 0.30, 
@@ -106,7 +112,7 @@ hypo <- data.frame(type = "F",
                    shell_weight = 1)
 
 # use predict() to predict the age of the hypothetical age of abalone:
-predict(lm_fit,new_data = hypo)
+predict(lm_fit,new_data = response)
 ```
 
 ## QUestion 7:
