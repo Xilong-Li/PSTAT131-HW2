@@ -2,7 +2,9 @@
 title: "HW2 PSTAT131"
 author: "Xilong Li"
 date: '2022-04-10'
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -109,6 +111,10 @@ predict(lm_fit,new_data = hypo)
 
 ## QUestion 7:
 ```{r}
+library(yardstick)
+
+abalone_metrics <- metric_set(rmse, rsq, mae)
+
 abalone_train_res <- predict(lm_fit, new_data = abalone_train %>% select(-age))
 abalone_train_res %>% 
   head()
@@ -117,11 +123,10 @@ abalone_train_res <- bind_cols(abalone_train_res, abalone_train %>% select(age))
 abalone_train_res %>% 
   head()
 
-abalone_metrics <- metric_set(rmse, rsq, mae)
 abalone_metrics(abalone_train_res, truth = age, 
                 estimate = .pred)
 ```
 R-Squared means the proportion of the variance for a dependent variable that's explained by an independent variable or variables in a regression model.(cited from https://www.investopedia.com/terms/r/r-squared.asp)        
-Therefore, since the value of R-squared is 0.5639424, this means that 56.39424% of the response variable can be explained by predictor variables. 
+Therefore, since the value of R-squared is 0.5639424, this means that 56.39424% of the response variable can be explained by predictor variables. However, this proportion does not seem to be great enough to make it a good regression model.
 
 
